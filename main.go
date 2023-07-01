@@ -80,12 +80,15 @@ func main() {
 	log.SetOutput(os.Stdout)
 	http.Handle("/metrics", promhttp.Handler())
 	go func() {
+		log.Println("Starting justmysocks metrics update loop")
+		log.Println("Update interval:", *updateInterval)
 		for {
 			updateMetrics(*apiAddress, *service, *id)
 			// Update every 5 minutes,Becasue the data is updated every 5 minutes by justmysocks
 			time.Sleep(*updateInterval)
 		}
 	}()
+
 	prometheus.MustRegister(monthlyBWLimitB, bwCounterB, bwResetDayOfMonth)
 	log.Printf("Listening on %s...", *listenAddress)
 	log.Fatal(http.ListenAndServe(*listenAddress, nil))
