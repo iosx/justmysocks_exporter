@@ -37,8 +37,12 @@ var (
 		}, []string{"service"})
 )
 
+var httpClient = &http.Client{
+	Timeout: 10 * time.Second,
+}
+
 func fetchJustMySocksAPIData(apiAddress string, service string, id string) (*JustMySocksData, error) {
-	resp, err := http.Get(fmt.Sprintf("%s?service=%s&id=%s", apiAddress, service, id))
+	resp, err := httpClient.Get(fmt.Sprintf("%s?service=%s&id=%s", apiAddress, service, id))
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +68,11 @@ func updateMetrics(apiAddress string, service string, id string) {
 
 var (
 	// Default port allocation https://github.com/prometheus/prometheus/wiki/Default-port-allocations
-	listenAddress = flag.String("web.listen-address", ":10001", "Address to listen on for web interface and telemetry.")
-	apiAddress    = flag.String("api-address", "https://justmysocks5.net/members/getbwcounter.php", "Address of JustMySocks API")
-	service       = flag.String("service", "", "JustMySocks service number")
-	id            = flag.String("id", "", "JustMySocks UUID")
+	listenAddress  = flag.String("web.listen-address", ":10001", "Address to listen on for web interface and telemetry.")
+	apiAddress     = flag.String("api-address", "https://justmysocks5.net/members/getbwcounter.php", "Address of JustMySocks API")
+	service        = flag.String("service", "", "JustMySocks service number")
+	id             = flag.String("id", "", "JustMySocks UUID")
+	updateInterval = flag.Duration("update-interval", 5*time.Minute, "Update interval for metrics")
 )
 
 func main() {
@@ -78,7 +83,7 @@ func main() {
 		for {
 			updateMetrics(*apiAddress, *service, *id)
 			// Update every 5 minutes,Becasue the data is updated every 5 minutes by justmysocks
-			time.Sleep(5 * time.Minute)
+			time.Sleep(*updateInterval)
 		}
 	}()
 	prometheus.MustRegister(monthlyBWLimitB, bwCounterB, bwResetDayOfMonth)
