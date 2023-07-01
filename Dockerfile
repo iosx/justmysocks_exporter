@@ -1,12 +1,13 @@
 FROM golang:1.20.5-bullseye
 
-ENV GOPROXY=https://goproxy.cn,direct
+#ENV GOPROXY=https://goproxy.cn,direct
 
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y git && git clone https://github.com/wulabing/justmysocks_exporter.git .
 
 RUN go mod download && go build -v -o justmysocks_exporter . && chmod +x justmysocks_exporter
+
 FROM debian:bullseye-slim
 
 WORKDIR /app

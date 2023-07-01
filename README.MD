@@ -1,6 +1,6 @@
 ## JustMySocks Exporter
 
-[中文README](https://github.com/wulabing/justmysocks_exporter/README_CN.MD)
+[中文README](https://github.com/wulabing/justmysocks_exporter/blob/main/README_CN.MD)
 ### Project Introduction
 
 `justmysocks_exporter` is a Prometheus Exporter written in Go language, designed to monitor the bandwidth usage of JustMySocks services. By calling the API provided by JustMySocks, it obtains information such as the monthly bandwidth limit, used bandwidth, and bandwidth reset date of the service, and exposes this information in the form of Prometheus metrics.
