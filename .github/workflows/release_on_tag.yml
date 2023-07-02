@@ -34,6 +34,7 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        files: justmysocks_exporter-${{ matrix.goos }}-${{ matrix.goarch }}
+        files: justmysocks_exporter-${{ matrix.goos }}-${{ matrix.goarch }}.
+        tag_name: ${{ github.ref }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
