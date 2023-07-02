@@ -31,10 +31,14 @@ jobs:
         GOARCH: ${{ matrix.goarch }}
       run: go build -o justmysocks_exporter-${{ matrix.goos }}-${{ matrix.goarch }}
 
+    - name: Get tag name
+      id: get_tag_name
+      run: echo "::set-output name=tag_name::${GITHUB_REF#refs/tags/}"
+
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
         files: justmysocks_exporter-${{ matrix.goos }}-${{ matrix.goarch }}.
-        tag_name: ${{ github.ref }}
+        tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
