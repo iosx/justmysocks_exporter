@@ -31,17 +31,17 @@ jobs:
         GOARCH: ${{ matrix.goarch }}
       run: go mod download && go build -v -o justmysocks_exporter-${{ matrix.goos }}-${{ matrix.goarch }} .
 
-    - name: Get latest tag
-      run: |
-        git fetch --tags
-        LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-        echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
-        echo "Latest tag: $LATEST_TAG"
+#    - name: Get latest tag
+#      run: |
+#        git fetch --tags
+#        LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+#        echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+#        echo "Latest tag: $LATEST_TAG"
 
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        files: justmysocks_exporter-${{ matrix.goos }}-${{ matrix.goarch }}.
-        tag_name: ${{ env.LATEST_TAG }}
+        files: justmysocks_exporter-${{ matrix.goos }}-${{ matrix.goarch }}
+#        tag_name: ${{ env.LATEST_TAG }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
