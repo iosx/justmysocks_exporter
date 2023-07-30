@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -46,7 +47,12 @@ func fetchJustMySocksAPIData(apiAddress string, service string, id string) (*Jus
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println("Error closing response body: ", err)
+		}
+	}(resp.Body)
 	var data JustMySocksData
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
@@ -59,11 +65,10 @@ func updateMetrics(apiAddress string, service string, id string) {
 		log.Println("Error fetching data: ", err)
 	} else {
 		log.Println("Fetched data: ", *data)
+		monthlyBWLimitB.WithLabelValues(service).Set(float64(data.MonthlyBWLimitB))
+		bwCounterB.WithLabelValues(service).Set(float64(data.BWCounterB))
+		bwResetDayOfMonth.WithLabelValues(service).Set(float64(data.BWResetDayOfMonth))
 	}
-
-	monthlyBWLimitB.WithLabelValues(service).Set(float64(data.MonthlyBWLimitB))
-	bwCounterB.WithLabelValues(service).Set(float64(data.BWCounterB))
-	bwResetDayOfMonth.WithLabelValues(service).Set(float64(data.BWResetDayOfMonth))
 }
 
 var (
