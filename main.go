@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -38,27 +38,26 @@ var (
 		}, []string{"service"})
 )
 
-var httpClient = &http.Client{
-	Timeout: 10 * time.Second,
-}
-
 func fetchJustMySocksAPIData(apiAddress string, service string, id string) (*JustMySocksData, error) {
-	resp, err := httpClient.Get(fmt.Sprintf("%s?service=%s&id=%s", apiAddress, service, id))
+	var data JustMySocksData
+
+	resp, err := http.Get(fmt.Sprintf("%s?service=%s&id=%s", apiAddress, service, id))
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Println("Error closing response body: ", err)
-		}
-	}(resp.Body)
-	var data JustMySocksData
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+	
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return nil, err
 	}
+
+	if err := json.Unmarshal(body, &data); err != nil {
+		return nil, err
+	}
+
 	return &data, nil
 }
+
 func updateMetrics(apiAddress string, service string, id string) {
 	data, err := fetchJustMySocksAPIData(apiAddress, service, id)
 	if err != nil {
@@ -74,7 +73,7 @@ func updateMetrics(apiAddress string, service string, id string) {
 var (
 	// Default port allocation https://github.com/prometheus/prometheus/wiki/Default-port-allocations
 	listenAddress  = flag.String("web.listen-address", ":10001", "Address to listen on for web interface and telemetry.")
-	apiAddress     = flag.String("api-address", "https://justmysocks5.net/members/getbwcounter.php", "Address of JustMySocks API")
+	apiAddress     = flag.String("api-address", "https://justmysocks6.net/members/getbwcounter.php", "Address of JustMySocks API")
 	service        = flag.String("service", "", "JustMySocks service number")
 	id             = flag.String("id", "", "JustMySocks UUID")
 	updateInterval = flag.Duration("update-interval", 5*time.Minute, "Update interval for metrics")
